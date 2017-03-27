@@ -1,0 +1,1044 @@
+00002000 Starting Address
+Assembler used: EASy68K Editor/Assembler v5.15.04
+Created On: 3/27/2017 5:05:48 AM
+
+00002000                             1      org $2000
+00002000                             2  
+00002000                             3  *-------------------------------------------------------
+00002000                             4  *Choose to be Commander Sheppard or Reapers
+00002000                             5  *-------------------------------------------------------
+00002000                             6  
+00002000                             7  *-------------------------------------------------------
+00002000                             8  *Validation values to be used, modify as needed
+00002000                             9  *Add additional validation values as required
+00002000                            10  *-------------------------------------------------------
+00002000  =00000000                 11  exit        EQU 0      used to exit assembly program
+00002000  =00000078                 12  min_fuel    EQU 120    min fuel requirement
+00002000  =00000001                 13  min_ship    EQU 1      min number of ships
+00002000  =00000009                 14  max_ship    EQU 9      max number of ships
+00002000  =00000006                 15  min_crew    EQU 6      min crew
+00002000  =00000001                 16  min_rate    EQU 1      min rate of fuel use based of speed
+00002000  =00000005                 17  max_rate    EQU 5      max rate e.g. Flank Speed       
+00002000  =00000005                 18  hit_point   EQU 5      points accumilated on enemy ship strike
+00002000  =00000008                 19  miss_point  EQU 8      points deducted for ordinace miss
+00002000  =00000064                 20  mine_loc    EQU 100    example for a hit
+00002000  =00000064                 21  credit_amount   EQU 100   amount of money player has to spend
+00002000  =0000000A                 22  no_of_ships     EQU 10  number of ships the player has
+00002000  =000000C8                 23  ship_cost       EQU 200  cost per ship
+00002000  =000000D2                 24  fuel_amount     EQU 210 fuel per ship
+00002000  =000000DC                 25  fuel_cost       EQU 220 cost per fuel
+00002000  =00000014                 26  crew_amount     EQU 20
+00002000                            27  
+00002000                            28  *Start of Game
+00002000                            29  start:
+00002000  11FC 0064 4000            30      move.b  #100,$4000 put score/health in memory location $4000
+00002006  47F8 4000                 31      lea     $4000,A3   assign address A3 to that memory location
+0000200A                            32  
+0000200A  21FC 00001388 0064        33      move.l  #5000, credit_amount
+00002012  21FC 000005DC 00C8        34      move.l  #1500, ship_cost
+0000201A  11FC 0064 00D2            35      move.b  #100,   fuel_amount
+00002020  11FC 0005 00DC            36      move.b  #5, fuel_cost
+00002026                            37  
+00002026                            38      
+00002026                            39      
+00002026  6100 0FE2                 40      bsr     welcome    branch to the welcome subroutine
+0000202A  6100 0FF4                 41      bsr     choice
+0000202E  6100 105A                 42      bsr     input      branch to the input subroutine
+00002032  6100 1130                 43      bsr     planet     branch to the planet subroutine
+00002036  6100 0FC8                 44      bsr     game       branch to the game subroutine
+0000203A                            45     
+0000203A                            46  *Game loop
+00003000                            47      org     $3000      the rest of the program is to be located from 3000 onwards
+00003000                            48  
+00003000                            49  *-------------------------------------------------------
+00003000                            50  *-------------------Game Subroutine---------------------
+00003000                            51  *-------------------------------------------------------
+00003000                            52  game:
+00003000  6100 00C6                 53      bsr     gameloop   branch to gameloop subroutine
+00003004  4E75                      54      rts                return from game: subroutine
+00003006                            55            
+00003006                            56  end:
+00003006  FFFF FFFF                 57      simhalt
+0000300A                            58  *-------------------------------------------------------
+0000300A                            59  *-------------------Welcome Subroutine------------------
+0000300A                            60  *-------------------------------------------------------
+0000300A                            61  welcome:
+0000300A  6100 05EE                 62      bsr     endl            branch to endl subroutine
+0000300E  43F9 00003613             63      lea     welcome_msg,A1  assign message to address register A1
+00003014  103C 000E                 64      move.b  #14,D0          move literal 14 to DO
+00003018  4E4F                      65      trap    #15             trap and interpret value in D0
+0000301A  6100 05DE                 66      bsr     endl            branch to endl subroutine
+0000301E  4E75                      67      rts               *return from welcome: subroutine
+00003020                            68      
+00003020                            69      
+00003020                            70  choice:
+00003020  6100 05D8                 71      bsr     endl                    choose between shephard and reapers
+00003024  6100 0588                 72      bsr     decorate
+00003028  43F9 00004AFA             73      lea     choice_msg,A1
+0000302E  103C 000E                 74      move.b  #14,D0
+00003032  4E4F                      75      trap    #15
+00003034  6100 05C4                 76      bsr     endl
+00003038  103C 0004                 77      move.b  #4,D0
+0000303C  4E4F                      78      trap    #15
+0000303E  B27C 0001                 79      cmp     #1,D1
+00003042  6700 0012                 80      beq     shepard
+00003046  B27C 0002                 81      cmp     #2,D1
+0000304A  6700 0024                 82      beq     reapers
+0000304E  66D0                      83      bne     choice
+00003050  6100 055C                 84      bsr     decorate
+00003054  4E75                      85      rts
+00003056                            86  shepard:
+00003056  6100 05A2                 87      bsr endl
+0000305A  6100 0552                 88      bsr decorate                    this is executed if u input 1 and choose shepard
+0000305E  43F9 00004B61             89      lea shepard_msg,A1
+00003064  103C 000E                 90      move.b  #14,D0
+00003068  4E4F                      91      trap    #15
+0000306A  6100 0542                 92      bsr decorate
+0000306E  4E75                      93      rts
+00003070                            94      
+00003070                            95          
+00003070                            96  reapers:
+00003070  6100 0588                 97      bsr endl
+00003074  6100 0538                 98      bsr decorate                    this is what is executed if u input 2 and choose reapers
+00003078  43F9 00004B84             99      lea repear_msg,A1
+0000307E  103C 000E                100      move.b  #14,D0
+00003082  4E4F                     101      trap    #15
+00003084  6100 0528                102      bsr decorate
+00003088  4E75                     103      rts
+0000308A                           104  *-------------------------------------------------------
+0000308A                           105  *---------Gameplay Input Values Subroutine--------------
+0000308A                           106  *-------------------------------------------------------    
+0000308A                           107  input:
+0000308A  6100 000C                108      bsr     input_welcome   branch to input message subroutine
+0000308E                           109  
+0000308E  6100 0096                110      bsr     fuel
+00003092  6100 00AC                111      bsr     crew            branch to crew input subroutine
+00003096  4E75                     112      rts
+00003098                           113  input_welcome:
+00003098  6100 0560                114      bsr     endl
+0000309C  6100 0510                115      bsr     decorate
+000030A0  43F9 000036C6            116      lea     input_msg, A1
+000030A6  103C 000E                117      move.b  #14, D0
+000030AA  4E4F                     118      trap    #15                 this displays the welcome message
+000030AC  6100 054C                119      bsr     endl
+000030B0  43F9 000036F4            120      lea     credit_msg, A1
+000030B6  103C 000E                121      move.b  #14, D0
+000030BA  4E4F                     122      trap    #15
+000030BC  2238 0064                123      move.l  credit_amount, D1
+000030C0  103C 0003                124      move.b  #3, D0
+000030C4  4E4F                     125      trap    #15
+000030C6  4E75                     126      rts
+000030C8                           127      
+000030C8                           128      
+000030C8                           129  
+000030C8                           130  *-------------------------------------------------------
+000030C8                           131  *----------------Gameloop (main loop)-------------------
+000030C8                           132  *------------------------------------------------------- 
+000030C8                           133  gameloop:
+000030C8  6100 0028                134      bsr     update          branch to update game subroutine 
+000030CC  6100 04FE                135      bsr     clear_screen    clears the screen         
+000030D0  6100 003A                136      bsr     draw            branch to draw screen subroutine
+000030D4  6100 04F6                137      bsr     clear_screen    clears the screen
+000030D8  6100 0458                138      bsr     gameplay       branch to gameplay subroutine
+000030DC  6100 04EE                139      bsr     clear_screen    clears the screen
+000030E0  6100 046E                140      bsr     hud             branch to display HUD subroutine
+000030E4  6100 04E6                141      bsr     clear_screen    clears the screen
+000030E8  6100 04EE                142      bsr     replay          branch to replay game subroutine
+000030EC  6100 04DE                143      bsr     clear_screen    clears the screen
+000030F0  4E75                     144      rts                     return from gameloop: subroutine
+000030F2                           145  
+000030F2                           146  *-------------------------------------------------------
+000030F2                           147  *---------------Update Mission Progress-----------------
+000030F2                           148  *  Move to battle location, engage enemy, fire and take
+000030F2                           149  *  fire, complete mission and return to base
+000030F2                           150  *------------------------------------------------------- 
+000030F2                           151  update:
+000030F2  6100 0506                152      bsr     endl            print a CR and LF
+000030F6  6100 04B6                153      bsr     decorate        decorate with dots using a loop
+000030FA  43F9 00004A28            154      lea     update_msg,A1   
+00003100  103C 000E                155      move.b  #14,D0
+00003104  4E4F                     156      trap    #15
+00003106  6100 04A6                157      bsr     decorate
+0000310A  4E75                     158      rts
+0000310C                           159  *-------------------------------------------------------
+0000310C                           160  *---------------Draw Mission Updates--------------------
+0000310C                           161  * Draw the game progress information, status regarding
+0000310C                           162  * mission
+0000310C                           163  *------------------------------------------------------- 
+0000310C                           164  draw:
+0000310C  6100 04EC                165      bsr     endl
+00003110  6100 049C                166      bsr     decorate
+00003114  43F9 00004A3A            167      lea     draw_msg,A1
+0000311A  103C 000E                168      move.b  #14,D0
+0000311E  4E4F                     169      trap    #15
+00003120  6100 048C                170      bsr     decorate
+00003124  4E75                     171      rts
+00003126                           172      
+00003126                           173      
+00003126                           174      
+00003126                           175  *-------------------------------------------------------
+00003126                           176  *-----------------------Ship Fuel-----------------------
+00003126                           177  *------------------------------------------------------- 
+00003126                           178  fuel:
+00003126  6100 04D2                179      bsr     endl
+0000312A  6100 0482                180      bsr     decorate
+0000312E  43F9 00003722            181      lea     fuel_msg,A1        this is used for the fuel variable
+00003134  103C 000E                182      move.b  #14,D0
+00003138  4E4F                     183      trap    #15
+0000313A  6100 0472                184      bsr     decorate
+0000313E  4E75                     185      rts
+00003140                           186  
+00003140                           187  *-------------------------------------------------------
+00003140                           188  *-----------------------Ships Crew----------------------
+00003140                           189  * Number of crew onboard
+00003140                           190  *-------------------------------------------------------   
+00003140                           191  crew:
+00003140  6100 04B8                192      bsr     endl
+00003144  6100 0468                193      bsr     decorate
+00003148  43F9 00003896            194      lea     crew_msg,A1
+0000314E  103C 000E                195      move.b  #14,D0              branch for taking crew input 
+00003152  4E4F                     196      trap    #15
+00003154  103C 0004                197      move.b  #4, D0
+00003158  4E4F                     198      trap    #15
+0000315A  21C1 0014                199      move.l  D1, crew_amount
+0000315E  6100 044E                200      bsr     decorate
+00003162  4E75                     201      rts
+00003164                           202  *-------------------------------------------------------
+00003164                           203  *-----------------------Planet selection----------------------
+00003164                           204  * thoosing which planet to go to
+00003164                           205  *-------------------------------------------------------      
+00003164                           206      
+00003164                           207  planet:
+00003164  6100 0494                208      bsr     endl
+00003168  6100 0444                209      bsr     decorate
+0000316C  43F9 00003908            210      lea     planet_msg,A1
+00003172  103C 000E                211      move.b  #14,D0                  branch to choose between first 3 planets in the game
+00003176  4E4F                     212      trap    #15
+00003178  103C 0004                213      move.b  #4, D0
+0000317C  4E4F                     214      trap    #15
+0000317E  143C 0001                215      move.b  #1, D2
+00003182  B242                     216      cmp     D2, D1
+00003184  6700 001E                217      beq     gorgon
+00003188  163C 0002                218      move.b  #2, D3
+0000318C  B243                     219      cmp     D3, D1
+0000318E  6700 003E                220      beq     hydra
+00003192  183C 0003                221      move.b  #3, D4
+00003196  B244                     222      cmp     D4, D1
+00003198  6700 005E                223      beq     pheonix
+0000319C  66C6                     224      bne     planet
+0000319E  6100 040E                225      bsr     decorate
+000031A2  4E75                     226      rts
+000031A4                           227  gorgon:
+000031A4  6100 0454                228      bsr endl
+000031A8  6100 0404                229      bsr decorate
+000031AC  43F9 00003990            230      lea gorgon_msg,A1
+000031B2  103C 000E                231      move.b #14,D0                   branch that executes the gorgon mission
+000031B6  4E4F                     232      trap   #15  
+000031B8  2A38 00D2                233      move.l fuel_amount, D5
+000031BC  7C0A                     234      move.l #10, D6
+000031BE  9A46                     235      sub    D6, D5
+000031C0  21C5 00D2                236      move.l D5, fuel_amount
+000031C4  6100 03E8                237      bsr decorate
+000031C8  6100 0058                238      bsr choice1mission1
+000031CC  4E75                     239      rts
+000031CE                           240  hydra:
+000031CE  6100 042A                241      bsr endl
+000031D2  6100 03DA                242      bsr decorate
+000031D6  43F9 000039B0            243      lea hydra_msg,A1                branch that executes the hydra mission
+000031DC  103C 000E                244      move.b #14,D0
+000031E0  4E4F                     245      trap   #15
+000031E2  2A38 00D2                246      move.l fuel_amount, D5
+000031E6  7C0A                     247      move.l #10, D6
+000031E8  9A46                     248      sub    D6, D5
+000031EA  21C5 00D2                249      move.l D5, fuel_amount
+000031EE  6100 03BE                250      bsr decorate
+000031F2  6100 01B0                251      bsr hydramission1
+000031F6  4E75                     252      rts
+000031F8                           253  pheonix:
+000031F8  6100 0400                254      bsr endl
+000031FC  6100 03B0                255      bsr decorate
+00003200  43F9 000039CF            256      lea pheonix_msg,A1
+00003206  103C 000E                257      move.b #14,D0           branch that executes the pheonix mission
+0000320A  4E4F                     258      trap   #15
+0000320C  2A38 00D2                259      move.l fuel_amount, D5
+00003210  7C0A                     260      move.l #10, D6
+00003212  9A46                     261      sub    D6, D5
+00003214  21C5 00D2                262      move.l D5, fuel_amount
+00003218  6100 0394                263      bsr decorate
+0000321C  6100 0204                264      bsr pheonixmission1
+00003220  4E75                     265      rts
+00003222                           266  *-------------------------------------------------------
+00003222                           267  *-----------------------Missions ----------------------
+00003222                           268  * Gorgon
+00003222                           269  *-------------------------------------------------------    
+00003222                           270  choice1mission1:
+00003222  6100 03D6                271      bsr     endl
+00003226  6100 0386                272      bsr     decorate
+0000322A  43F9 000039F0            273      lea     gorgonstory1_msg,A1
+00003230  103C 000E                274      move.b  #14,D0
+00003234  4E4F                     275      trap    #15
+00003236  103C 0004                276      move.b  #4, D0
+0000323A  4E4F                     277      trap    #15
+0000323C  143C 0001                278      move.b  #1, D2
+00003240  B242                     279      cmp     D2, D1                      this is the first mission for gorgon and the choices
+00003242  6700 0014                280      beq     fight
+00003246  163C 0002                281      move.b  #2, D3
+0000324A  B243                     282      cmp     D3, D1
+0000324C  6700 0028                283      beq     talk
+00003250  66D0                     284      bne     choice1mission1
+00003252  6100 035A                285      bsr     decorate
+00003256  4E75                     286      rts
+00003258                           287      
+00003258                           288      
+00003258                           289  fight:
+00003258  6100 03A0                290      bsr endl
+0000325C  6100 0350                291      bsr decorate
+00003260  43F9 00003B34            292      lea gorgonchoice1_msg,A1            choice 1
+00003266  103C 000E                293      move.b #14,D0
+0000326A  4E4F                     294      trap #15
+0000326C  6100 0340                295      bsr decorate
+00003270  6100 0022                296      bsr gorgonmission2
+00003274  4E75                     297      rts
+00003276                           298  
+00003276                           299  talk:
+00003276  6100 0382                300      bsr endl
+0000327A  6100 0332                301      bsr decorate
+0000327E  43F9 00003B82            302      lea gorgonchoice2_msg,A1        choice 2
+00003284  103C 000E                303      move.b #14, D0
+00003288  4E4F                     304      trap #15
+0000328A  6100 0322                305      bsr decorate
+0000328E  6100 0004                306      bsr gorgonmission2
+00003292  4E75                     307      rts
+00003294                           308  gorgonmission2:
+00003294  6100 0364                309      bsr     endl
+00003298  6100 0314                310      bsr     decorate
+0000329C  43F9 00003BFC            311      lea     gorgonstory2_msg,A1     this is the 2nd mission for gorgon and the choices
+000032A2  103C 000E                312      move.b  #14,D0
+000032A6  4E4F                     313      trap    #15
+000032A8  103C 0004                314      move.b  #4,D0
+000032AC  4E4F                     315      trap    #15
+000032AE  143C 0001                316      move.b  #1, D2
+000032B2  B242                     317      cmp     D2, D1
+000032B4  6700 0010                318      beq     abandonplanet
+000032B8  163C 0002                319      move.b  #2, D3
+000032BC  B243                     320      cmp     D3, D1
+000032BE  6700 0030                321      beq     saveplanet
+000032C2  66D0                     322      bne     gorgonmission2
+000032C4  4E75                     323      rts
+000032C6                           324  abandonplanet:
+000032C6  6100 0332                325      bsr endl
+000032CA  6100 02E2                326      bsr decorate
+000032CE  43F9 00003D33            327      lea gorgonstory2choice1_msg,A1      choice 1 sub the fuel variable if moving from planet
+000032D4  103C 000E                328      move.b  #14,D0
+000032D8  4E4F                     329      trap    #15
+000032DA  2A38 00D2                330      move.l fuel_amount, D5
+000032DE  7C0A                     331      move.l #10, D6
+000032E0  9A46                     332      sub    D6, D5
+000032E2  21C5 00D2                333      move.l D5, fuel_amount
+000032E6  6100 02C6                334      bsr decorate
+000032EA  6100 0040                335      bsr lumeryamission1
+000032EE  4E75                     336      rts
+000032F0                           337  saveplanet:
+000032F0  6100 0308                338      bsr endl
+000032F4  6100 02B8                339      bsr decorate
+000032F8  43F9 00003DBC            340      lea gorgonstory2choice2_msg,A1      choice 2
+000032FE  103C 000E                341      move.b #14,D0
+00003302  4E4F                     342      trap   #15
+00003304  6100 02A8                343      bsr decorate
+00003308  6100 0004                344      bsr gameending1
+0000330C  4E75                     345      rts
+0000330E                           346  *-------------------------------------------------------
+0000330E                           347  *-----------------------Ending ----------------------
+0000330E                           348  * game endings
+0000330E                           349  *-------------------------------------------------------  
+0000330E                           350  gameending1:
+0000330E  6100 02EA                351      bsr endl
+00003312  6100 029A                352      bsr decorate
+00003316  43F9 00003E30            353      lea ending1_msg,A1  
+0000331C  103C 000E                354      move.b  #14,D0          the first ending in the game
+00003320  4E4F                     355      trap    #15
+00003322  103C 0004                356      move.b  #4,D0
+00003326  6100 0286                357      bsr decorate
+0000332A  4E75                     358      rts
+0000332C                           359  
+0000332C                           360      
+0000332C                           361      
+0000332C                           362  *-------------------------------------------------------
+0000332C                           363  *-----------------------Missions ----------------------
+0000332C                           364  * Lumerya
+0000332C                           365  *-------------------------------------------------------      
+0000332C                           366  lumeryamission1:
+0000332C  6100 02CC                367      bsr     endl
+00003330  6100 027C                368      bsr     decorate
+00003334  43F9 00004813            369      lea     lumeryastory1_msg,A1            this is the first mission for Lumerya
+0000333A  103C 000E                370      move.b  #14,D0
+0000333E  4E4F                     371      trap    #15
+00003340  4E4F                     372      trap    #15
+00003342  103C 0004                373      move.b  #4,D0
+00003346  4E4F                     374      trap    #15
+00003348  143C 0001                375      move.b  #1,D2
+0000334C  B242                     376      cmp     D2,D1
+0000334E  6700 0014                377      beq     gethelp
+00003352  163C 0002                378      move.b  #2,D3
+00003356  B243                     379      cmp     D3,D1
+00003358  6700 002A                380      beq     fightlumerya
+0000335C  66CE                     381      bne     lumeryamission1
+0000335E  6100 024E                382      bsr     decorate
+00003362  4E75                     383      rts   
+00003364                           384      
+00003364                           385  gethelp:
+00003364  6100 0294                386      bsr endl
+00003368  6100 0244                387      bsr decorate
+0000336C  43F9 00003ECF            388      lea ending2_msg,A1
+00003372  103C 000E                389      move.b  #14,D0
+00003376  4E4F                     390      trap    #15                 choice 1
+00003378  103C 0004                391      move.b  #4,D0
+0000337C  4E4F                     392      trap    #15
+0000337E  6100 022E                393      bsr decorate
+00003382  4E75                     394      rts
+00003384                           395  fightlumerya:
+00003384  6100 0274                396      bsr endl
+00003388  6100 0224                397      bsr decorate                choice2
+0000338C  43F9 00003FC8            398      lea ending3_msg,A1  
+00003392  103C 000E                399      move.b  #14,D0
+00003396  4E4F                     400      trap    #15
+00003398  103C 0004                401      move.b  #4,D0
+0000339C  4E4F                     402      trap    #15
+0000339E  6100 020E                403      bsr decorate
+000033A2  4E75                     404      rts    
+000033A4                           405      
+000033A4                           406      
+000033A4                           407  *-------------------------------------------------------
+000033A4                           408  *-----------------------Missions ----------------------
+000033A4                           409  * Hydra
+000033A4                           410  *-------------------------------------------------------   
+000033A4                           411  
+000033A4                           412  hydramission1:
+000033A4  6100 0254                413      bsr     endl                            this is 1st mission for hydra
+000033A8  6100 0204                414      bsr     decorate
+000033AC  43F9 0000425F            415      lea     hydrastory1_msg,A1
+000033B2  103C 000E                416      move.b  #14,D0
+000033B6  4E4F                     417      trap    #15
+000033B8  103C 0004                418      move.b  #4, D0
+000033BC  4E4F                     419      trap    #15
+000033BE  143C 0001                420      move.b  #1, D2
+000033C2  B242                     421      cmp     D2, D1
+000033C4  6700 0014                422      beq     backtogorgon
+000033C8  163C 0002                423      move.b  #2, D3
+000033CC  B243                     424      cmp     D3, D1
+000033CE  6700 0034                425      beq     random
+000033D2  66D0                     426      bne     hydramission1
+000033D4  6100 01D8                427      bsr     decorate
+000033D8  4E75                     428      rts
+000033DA                           429  backtogorgon:
+000033DA  6100 021E                430      bsr endl
+000033DE  6100 01CE                431      bsr decorate
+000033E2  43F9 000043C1            432      lea hydrachoice1_msg,A1                     choice1
+000033E8  303C 000E                433      move #14,D0
+000033EC  4E4F                     434      trap #15
+000033EE  2A38 00D2                435      move.l fuel_amount, D5
+000033F2  7C0A                     436      move.l #10, D6
+000033F4  9A46                     437      sub    D6, D5
+000033F6  21C5 00D2                438      move.l D5, fuel_amount
+000033FA  6100 01B2                439      bsr decorate
+000033FE  6100 FE22                440      bsr choice1mission1
+00003402  4E75                     441      rts
+00003404                           442  
+00003404                           443  random:
+00003404  6100 01F4                444      bsr endl
+00003408  6100 01A4                445      bsr decorate
+0000340C  43F9 000043E1            446      lea hydrachoice2_msg,A1                 choice 2
+00003412  303C 000E                447      move #14, D0
+00003416  4E4F                     448      trap #15
+00003418  6100 0194                449      bsr decorate
+0000341C  6100 009E                450      bsr imhotepmission1
+00003420  4E75                     451      rts
+00003422                           452  
+00003422                           453   *-------------------------------------------------------
+00003422                           454  *-----------------------Missions ----------------------
+00003422                           455  * Pheonix
+00003422                           456  *-------------------------------------------------------   
+00003422                           457  pheonixmission1:
+00003422  6100 01D6                458      bsr     endl
+00003426  6100 0186                459      bsr     decorate
+0000342A  43F9 0000442F            460      lea     pheonixstory1_msg,A1                this is the 1st mission for pheonix
+00003430  103C 000E                461      move.b  #14,D0
+00003434  4E4F                     462      trap    #15
+00003436  103C 0004                463      move.b  #4,D0
+0000343A  4E4F                     464      trap    #15
+0000343C  143C 0001                465      move.b  #1,D2
+00003440  B242                     466      cmp     D2,D1
+00003442  6700 0014                467      beq     fight1
+00003446  163C 0002                468      move.b  #2,D3
+0000344A  B243                     469      cmp     D3,D1
+0000344C  6700 0036                470      beq     run
+00003450  66D0                     471      bne     pheonixmission1
+00003452  6100 015A                472      bsr     decorate
+00003456  4E75                     473      rts
+00003458                           474  fight1:
+00003458  6100 01A0                475      bsr     endl
+0000345C  6100 0150                476      bsr     decorate
+00003460  43F9 00004508            477      lea     pheonixchoice1_msg,A1           choice 1
+00003466  303C 000E                478      move    #14,D0
+0000346A  4E4F                     479      trap    #15
+0000346C  2A38 0014                480      move.l  crew_amount, D5
+00003470  1C3C 0002                481      move.b  #2, D6
+00003474  9A46                     482      sub     D6, D5
+00003476  21C5 0014                483      move.l  D5, crew_amount
+0000347A  6100 0132                484      bsr     decorate
+0000347E  6100 003C                485      bsr     imhotepmission1
+00003482  4E75                     486      rts
+00003484                           487  run:
+00003484  6100 0174                488      bsr     endl
+00003488  6100 0124                489      bsr     decorate
+0000348C  43F9 0000456A            490      lea     pheonixchoice2_msg,A1           choice 2
+00003492  303C 000E                491      move    #14,D0
+00003496  4E4F                     492      trap    #15
+00003498  2A38 00D2                493      move.l fuel_amount, D5
+0000349C  7C0A                     494      move.l #10, D6
+0000349E  9A46                     495      sub    D6, D5
+000034A0  21C5 00D2                496      move.l D5, fuel_amount
+000034A4  2A38 0064                497      move.l  credit_amount, D5
+000034A8  1C3C 00C8                498      move.b  #200, D6
+000034AC  DA46                     499      add     D6, D5
+000034AE  21C5 0064                500      move.l  D5, credit_amount
+000034B2  6100 00FA                501      bsr     decorate
+000034B6  6100 0004                502      bsr     imhotepmission1
+000034BA  4E75                     503      rts
+000034BC                           504  *-------------------------------------------------------
+000034BC                           505  *-----------------------Missions ----------------------
+000034BC                           506  * Imhotep
+000034BC                           507  *-------------------------------------------------------   
+000034BC                           508  imhotepmission1:
+000034BC  6100 013C                509      bsr     endl
+000034C0  6100 00EC                510      bsr     decorate
+000034C4  43F9 00004623            511      lea     imhotepstory1_msg,A1        this is the mission for imhotep
+000034CA  103C 000E                512      move.b  #14,D0
+000034CE  4E4F                     513      trap    #15
+000034D0  103C 0004                514      move.b  #4,D0
+000034D4  4E4F                     515      trap    #15
+000034D6  143C 0001                516      move.b  #1,D2
+000034DA  B242                     517      cmp     D2,D1
+000034DC  6700 0014                518      beq     hideout
+000034E0  163C 0002                519      move.b  #2,D3
+000034E4  B243                     520      cmp     D3,D1
+000034E6  6700 002A                521      beq     negotiate
+000034EA  66D0                     522      bne     imhotepmission1
+000034EC  6100 00C0                523      bsr     decorate
+000034F0  4E75                     524      rts
+000034F2                           525  hideout:
+000034F2  6100 0106                526      bsr endl
+000034F6  6100 00B6                527      bsr decorate
+000034FA  43F9 00004171            528      lea ending5_msg,A1              option1
+00003500  103C 000E                529      move.b  #14,D0
+00003504  4E4F                     530      trap    #15
+00003506  103C 0004                531      move.b  #4,D0
+0000350A  4E4F                     532      trap    #15
+0000350C  6100 00A0                533      bsr decorate
+00003510  4E75                     534      rts
+00003512                           535  negotiate:
+00003512  6100 00E6                536      bsr endl
+00003516  6100 0096                537      bsr decorate
+0000351A  43F9 000040DD            538      lea ending4_msg,A1              option2
+00003520  103C 000E                539      move.b  #14,D0
+00003524  4E4F                     540      trap    #15
+00003526  103C 0004                541      move.b  #4,D0
+0000352A  4E4F                     542      trap    #15
+0000352C  6100 0080                543      bsr decorate
+00003530  4E75                     544      rts
+00003532                           545  *-------------------------------------------------------
+00003532                           546  *---Game Play (Mission Progress, Battle Maneuvers)------
+00003532                           547  *------------------------------------------------------- 
+00003532                           548  gameplay:
+00003532  6100 00C6                549      bsr     endl
+00003536  6100 0076                550      bsr     decorate
+0000353A  43F9 00004A19            551      lea     gameplay_msg,A1
+00003540  103C 000E                552      move.b  #14,D0
+00003544  4E4F                     553      trap    #15
+00003546  6100 0066                554      bsr     decorate
+0000354A  6100 0026                555      bsr     collision
+0000354E  4E75                     556      rts
+00003550                           557  
+00003550                           558  *-------------------------------------------------------
+00003550                           559  *-----------------Heads Up Display (Score)--------------
+00003550                           560  * Retrieves the score from memory location
+00003550                           561  *-------------------------------------------------------   
+00003550                           562  hud:
+00003550                           563  
+00003550  6100 00A8                564      bsr     endl
+00003554  6100 0058                565      bsr     decorate
+00003558  43F9 00004A86            566      lea     hud_msg,A1
+0000355E  103C 000E                567      move.b  #14,D0
+00003562  4E4F                     568      trap    #15
+00003564  1213                     569      move.b  (A3),D1     retrieve the value A3 point to and move to D1
+00003566  103C 0003                570      move.b  #3,D0       move literal 3 to D0
+0000356A  4E4F                     571      trap    #15         intrepret value in D0, which 3 which displays D1
+0000356C  6100 0040                572      bsr     decorate
+00003570  4E75                     573      rts
+00003572                           574  
+00003572                           575  *-------------------------------------------------------
+00003572                           576  *-----------------------Taking Fire---------------------
+00003572                           577  * This could be used for collision detection, if 
+00003572                           578  *-------------------------------------------------------
+00003572                           579  collision:
+00003572  123C 0064                580      move.b  #mine_loc,D1
+00003576  B27C 0064                581      cmp     #100,D1 is( x == 100)?
+0000357A  6600 0010                582      bne     collision_miss if x is equal to 100, then hit
+0000357E                           583  collision_hit:
+0000357E                           584      *hit
+0000357E  43F9 00004A48            585      lea     hit_msg,A1
+00003584  303C 000E                586      move    #14,D0
+00003588  4E4F                     587      trap    #15
+0000358A  4E75                     588      rts
+0000358C                           589      
+0000358C                           590  collision_miss:
+0000358C                           591      *miss
+0000358C  43F9 00004A50            592      lea     miss_msg,A1
+00003592  303C 000E                593      move    #14,D0
+00003596  4E4F                     594      trap    #15
+00003598  4E75                     595      rts
+0000359A                           596  
+0000359A                           597  *-------------------------------------------------------
+0000359A                           598  *--------------------------Loop-------------------------
+0000359A                           599  *-------------------------------------------------------
+0000359A                           600  loop:
+0000359A  163C 0005                601      move.b  #5, D3 loop counter D3=5
+0000359E                           602  next:
+0000359E  43F9 00004A56            603      lea     loop_msg,A1
+000035A4  103C 000E                604      move.b  #14,D0
+000035A8  4E4F                     605      trap    #15
+000035AA  5343                     606      sub     #1,D3   decrement loop counter
+000035AC  66F0                     607      bne     next    repeat until D0=0
+000035AE                           608  
+000035AE                           609  *-------------------------------------------------------
+000035AE                           610  *------------------Screen Decoration--------------------
+000035AE                           611  *-------------------------------------------------------
+000035AE                           612  decorate:
+000035AE  163C 003C                613      move.b  #60, D3
+000035B2  6100 0046                614      bsr     endl
+000035B6                           615  out:
+000035B6  43F9 00004A56            616      lea     loop_msg,A1
+000035BC  103C 000E                617      move.b  #14,D0
+000035C0  4E4F                     618      trap    #15
+000035C2  5343                     619      sub     #1,D3   decrement loop counter
+000035C4  66F0                     620      bne     out     repeat until D0=0
+000035C6  6100 0032                621      bsr     endl
+000035CA  4E75                     622      rts
+000035CC                           623      
+000035CC                           624  clear_screen: 
+000035CC  103C 000B                625      move.b  #11,D0      clear screen
+000035D0  323C FF00                626      move.w  #$ff00,D1
+000035D4  4E4F                     627      trap    #15
+000035D6  4E75                     628      rts
+000035D8                           629  *-------------------------------------------------------
+000035D8                           630  *------------------------Replay-------------------------
+000035D8                           631  *-------------------------------------------------------
+000035D8                           632  replay:
+000035D8  6100 0020                633      bsr     endl
+000035DC  43F9 00004A58            634      lea     replay_msg,A1
+000035E2  103C 000E                635      move.b  #14,D0
+000035E6  4E4F                     636      trap    #15
+000035E8                           637      
+000035E8  103C 0004                638      move.b  #4,D0
+000035EC  4E4F                     639      trap    #15
+000035EE                           640  
+000035EE  B27C 0000                641      cmp     #exit,D1
+000035F2  6700 FA12                642      beq     end         if SR Z register contains 1 beq => Branch Equals
+000035F6  6100 FAD0                643      bsr     gameloop
+000035FA                           644  
+000035FA                           645  endl:
+000035FA  48E7 8040                646      movem.l D0/A1,-(A7)
+000035FE  303C 000E                647      move    #14,D0
+00003602  43F9 00003610            648      lea     crlf,A1
+00003608  4E4F                     649      trap    #15
+0000360A  4CDF 0201                650      movem.l (A7)+,D0/A1
+0000360E  4E75                     651      rts
+00003610                           652      
+00003610                           653  *-------------------------------------------------------
+00003610                           654  *-------------------Data Delarations--------------------
+00003610                           655  *-------------------------------------------------------
+00003610                           656  
+00003610= 0D 0A 00                 657  crlf:           dc.b    $0D,$0A,0
+00003613= 2A 2A 2A 2A 2A 2A ...    658  welcome_msg:    dc.b    '************************************************************'
+0000364F= 0D 0A                    659                  dc.b    $0D,$0A
+00003651= 4D 41 53 53 20 45 ...    660                  dc.b    'MASS Effect, command and conqure your fleet of ships'
+00003685= 0D 0A                    661                  dc.b    $0D,$0A
+00003687= 2A 2A 2A 2A 2A 2A ...    662                  dc.b    '************************************************************'
+000036C3= 0D 0A 00                 663                  dc.b    $0D,$0A,0
+000036C6= 50 75 72 63 68 61 ...    664  input_msg:      dc.b    'Purchase ships and resources for your mission',0
+000036F4                           665                      
+000036F4                           666                          
+000036F4= 54 68 65 20 61 6D ...    667  credit_msg      dc.b    'The amount of credits you currently have is: ',0
+00003722= 59 6F 75 20 73 74 ...    668  fuel_msg:       dc.b    'You start the game with 100 fuel',0
+00003743                           669  
+00003743                           670  
+00003743                           671                  
+00003743= 53 68 69 70 73 20 ...    672  ships_msg:      dc.b    'Ships cost 1500 credits each'
+0000375F= 0D 0A                    673                  dc.b    $0D,$0A    
+00003761= 4E 75 6D 62 65 72 ...    674                  dc.b    'Number of mission ships wanted : ',0
+00003783= 4F 6E 65 20 54 68 ...    675  rate_msg:       dc.b    'One Third[1], Two Thirds[2], Standard speed[3], ' 
+000037B3= 0D 0A                    676                  dc.b    $0D,$0A
+000037B5= 46 75 6C 6C 20 53 ...    677                  dc.b    'Full Speed[4], Flank Speed[5] units fuel per click'
+000037E7= 0D 0A                    678                  dc.b    $0D,$0A
+000037E9= 45 6E 74 65 72 20 ...    679                  dc.b    'Enter Speed : ',0
+000037F8= 4D 69 73 73 69 6F ...    680  distance_msg:   dc.b    'Mission distance e.g. 40 (with 100 units of fuel  '
+0000382A= 0D 0A                    681                  dc.b    $0D,$0A
+0000382C= 4F 6E 65 20 54 68 ...    682                  dc.b    'One Third speed 20 units remain for manuvouirs) ships '
+00003862= 0D 0A                    683                  dc.b    $0D,$0A
+00003864= 77 69 74 68 6F 75 ...    684                  dc.b    'without fuel are lost.'
+0000387A= 0D 0A                    685                  dc.b    $0D,$0A
+0000387C= 45 6E 74 65 72 20 ...    686                  dc.b    'Enter mission distance : ',0
+00003896= 45 61 63 68 20 73 ...    687  crew_msg:       dc.b    'Each ships need at least 5 crew members'
+000038BD= 0D 0A                    688                  dc.b    $0D,$0A
+000038BF= 54 68 65 20 63 6F ...    689                  dc.b    'The cost per crew member is 200 credits'
+000038E6= 0D 0A                    690                  dc.b    $0D,$0A
+000038E8= 45 6E 74 65 72 20 ...    691                  dc.b    'Enter number of crew required: ',0
+00003908= 59 6F 75 20 6E 65 ...    692  planet_msg:     dc.b    'You need to choose which planet to go to'
+00003930= 0D 0A                    693                  dc.b    $0D,$0A
+00003932= 50 72 65 73 73 20 ...    694                  dc.b    'Press 1 to go to Gorgon'
+00003949= 0D 0A                    695                  dc.b    $0D,$0A
+0000394B= 50 72 65 73 73 20 ...    696                  dc.b    'Press 2 to go to Hydra' 
+00003961= 0D 0A                    697                  dc.b    $0D,$0A
+00003963= 50 72 65 73 73 20 ...    698                  dc.b    'Press 3 to go to Pheonix'
+0000397B= 0D 0A                    699                  dc.b    $0D,$0A
+0000397D= 45 6E 74 65 72 20 ...    700                  dc.b    'Enter your choice:',0
+00003990= 59 6F 75 20 68 61 ...    701  gorgon_msg:     dc.b    'You have chosen to go to Gorgon',0
+000039B0= 59 6F 75 20 68 61 ...    702  hydra_msg:      dc.b    'You have chosen to go to Hydra',0
+000039CF= 59 6F 75 20 68 61 ...    703  pheonix_msg:    dc.b    'You have chosen to go to Pheonix',0
+000039F0                           704  
+000039F0                           705  
+000039F0= 59 6F 75 20 67 65 ...    706  gorgonstory1_msg:  dc.b    'You get on to Gordon and you find aliens that are living on this planet'
+00003A37= 0D 0A                    707                  dc.b    $0D,$0A
+00003A39= 54 68 65 79 20 73 ...    708                  dc.b    'They seem to be less advanced than the population from ur home planet'
+00003A7E= 0D 0A                    709                  dc.b    $0D,$0A
+00003A80= 59 6F 75 20 61 72 ...    710                  dc.b    'You are faced with the choice to fight them to try and take over their planet'
+00003ACD= 0D 0A                    711                  dc.b    $0D,$0A
+00003ACF= 4F 72 20 79 6F 75 ...    712                  dc.b    'Or you can try and make an alliance with them'
+00003AFC= 0D 0A                    713                  dc.b    $0D,$0A
+00003AFE= 50 72 65 73 73 20 ...    714                  dc.b    'Press 1 to fight'
+00003B0E= 0D 0A                    715                  dc.b    $0D,$0A
+00003B10= 50 72 65 73 73 20 ...    716                  dc.b    'Press 2 to talk'
+00003B1F= 0D 0A                    717                  dc.b    $0D,$0A
+00003B21= 45 6E 74 65 72 20 ...    718                  dc.b    'Enter your choice:',0
+00003B34= 59 6F 75 20 68 61 ...    719  gorgonchoice1_msg: dc.b    'You have succesfully destoyed the weak enemy forces and taken over the planet',0
+00003B82= 59 6F 75 20 68 61 ...    720  gorgonchoice2_msg: dc.b    'You have tried to form an alliance but the planet residents have atacked '
+00003BCB= 0D 0A                    721                  dc.b    $0D,$0A
+00003BCD= 59 6F 75 20 69 6E ...    722                  dc.b    'You in negotations and you loose a crew member',0
+00003BFC= 53 69 6E 63 65 20 ...    723  gorgonstory2_msg: dc.b 'Since you have taken over the planet the planet goes into disarray'
+00003C3E= 0D 0A                    724                  dc.b    $0D,$0A
+00003C40= 41 6E 64 20 79 6F ...    725                  dc.b  'And you discover that the aliens were essential for the planets existence'
+00003C89= 0D 0A                    726                  dc.b    $0D,$0A
+00003C8B= 59 6F 75 20 68 61 ...    727                  dc.b  'You have a choice to either abandon the dying planet '
+00003CC0= 0D 0A                    728                  dc.b    $0D,$0A
+00003CC2= 4F 72 20 74 72 79 ...    729                  dc.b  'Or try to recover by using ur farming skills'
+00003CEE= 0D 0A                    730                  dc.b    $0D,$0A
+00003CF0= 50 72 65 73 73 20 ...    731                  dc.b   'Press 1 to abandon'
+00003D02= 0D 0A                    732                  dc.b    $0D,$0A
+00003D04= 50 72 65 73 73 20 ...    733                  dc.b   'Press 2 to try and recover'
+00003D1E= 0D 0A                    734                  dc.b    $0D,$0A
+00003D20= 45 6E 74 65 72 20 ...    735                  dc.b    'Enter your choice:',0                
+00003D33                           736  gorgonstory2choice1_msg: 
+00003D33= 53 69 6E 63 65 20 ...    737                  dc.b   'Since you have chosen to abandon the planet'
+00003D5E= 0D 0A                    738                  dc.b    $0D,$0A
+00003D60= 59 6F 75 20 65 6E ...    739                  dc.b   'You end up wandering in space trying to look for a planet'
+00003D99= 0D 0A                    740                  dc.b    $0D,$0A
+00003D9B= 59 6F 75 20 66 69 ...    741                  dc.b   'You find a planet called Lumerya',0
+00003DBC                           742  gorgonstory2choice2_msg:
+00003DBC= 53 69 6E 63 65 20 ...    743                  dc.b   'Since you have chosen to try and save the planet you end up'
+00003DF7= 0D 0A                    744                  dc.b    $0D,$0A
+00003DF9= 45 78 74 65 6E 64 ...    745                  dc.b   'Extending the lifespan of the planet but not saving it',0
+00003E30                           746  ending1_msg:
+00003E30= 53 69 6E 63 65 20 ...    747                  dc.b   'Since you have failed to save the planet'
+00003E58= 0D 0A                    748                  dc.b    $0D,$0A
+00003E5A= 4E 6F 77 20 69 74 ...    749                  dc.b   'Now it is too late and you cannot escape and you'
+00003E8A= 0D 0A                    750                  dc.b    $0D,$0A
+00003E8C= 44 69 65 20 74 6F ...    751                  dc.b    'Die together with the planet'
+00003EA8= 0D 0A                    752                  dc.b    $0D,$0A
+00003EAA= 49 20 61 6D 20 73 ...    753                  dc.b    'I am sorry but your jorney ends here',0 
+00003ECF                           754  
+00003ECF                           755  
+00003ECF= 59 6F 75 20 67 65 ...    756  ending2_msg:    dc.b   'You get to know the people of Hydra'
+00003EF2= 0D 0A                    757                  dc.b    $0D,$0A
+00003EF4= 57 69 74 68 20 74 ...    758                  dc.b   'With the help of people from Lumerya'
+00003F18= 0D 0A                    759                  dc.b    $0D,$0A
+00003F1A= 59 6F 75 20 65 6E ...    760                  dc.b   'You end up enjoying ur life on Hydra and decide to stay'
+00003F51= 0D 0A                    761                  dc.b    $0D,$0A
+00003F53= 59 6F 75 20 73 74 ...    762                  dc.b   'You start a family and lead a happy life'
+00003F7B= 0D 0A                    763                  dc.b    $0D,$0A
+00003F7D= 59 6F 75 20 61 6C ...    764                  dc.b   'You also setup a restaurant that starts prospering'
+00003FAF= 0D 0A                    765                  dc.b    $0D,$0A
+00003FB1= 59 6F 75 72 20 6A ...    766                  dc.b   'Your journey ends here',0            
+00003FC8                           767                                 
+00003FC8= 53 69 6E 63 65 20 ...    768  ending3_msg:    dc.b   'Since lumerya is way too strong'
+00003FE7= 0D 0A                    769                  dc.b    $0D,$0A
+00003FE9= 54 68 65 79 20 63 ...    770                  dc.b   'They capture you and your crew members'
+0000400F= 0D 0A                    771                  dc.b    $0D,$0A
+00004011= 54 68 65 6E 20 74 ...    772                  dc.b   'Then they start using you for experiments'
+0000403A= 0D 0A                    773                  dc.b    $0D,$0A
+0000403C= 59 6F 75 20 67 65 ...    774                  dc.b   'You get an over powered super power but'
+00004063= 0D 0A                    775                  dc.b    $0D,$0A
+00004065= 42 75 74 20 73 69 ...    776                  dc.b   'But since the power is too strong you end up going rambo'
+0000409D= 0D 0A                    777                  dc.b    $0D,$0A
+0000409F= 41 6E 64 20 79 6F ...    778                  dc.b   'And you end up destroying the univers'
+000040C4= 0D 0A                    779                  dc.b    $0D,$0A
+000040C6= 59 6F 75 72 20 6A ...    780                  dc.b   'Your journey ends here',0
+000040DD                           781                  
+000040DD= 44 75 72 69 6E 67 ...    782  ending4_msg:    dc.b   'During negotiation the negotiations break down'
+0000410B= 0D 0A                    783                  dc.b    $0D,$0A
+0000410D= 41 6E 64 20 74 68 ...    784                  dc.b   'And then a massive fight breaks out'
+00004130= 0D 0A                    785                  dc.b    $0D,$0A
+00004132= 59 6F 75 20 65 6E ...    786                  dc.b   'You end up getting overwhelmed and die'
+00004158= 0D 0A                    787                  dc.b    $0D,$0A
+0000415A= 59 6F 75 72 20 6A ...    788                  dc.b   'Your journey ends here',0
+00004171                           789                  
+00004171= 59 6F 75 20 61 72 ...    790  ending5_msg:    dc.b   'You are succesful in setting up ur hideout'
+0000419B= 0D 0A                    791                  dc.b    $0D,$0A
+0000419D= 42 75 74 20 73 65 ...    792                  dc.b   'But secluded from society you start dark thoughts'
+000041CE= 0D 0A                    793                  dc.b    $0D,$0A
+000041D0= 41 6E 64 20 79 6F ...    794                  dc.b   'And you setup a terrorist organisation'
+000041F6= 0D 0A                    795                  dc.b    $0D,$0A
+000041F8= 41 6E 64 20 79 6F ...    796                  dc.b   'And you spend the rest of ur life terrorising other planets'
+00004233= 0D 0A                    797                  dc.b    $0D,$0A
+00004235= 55 6E 74 69 6C 20 ...    798                  dc.b   'Until eventualy you get nuked by Lumeryra',0               
+0000425F                           799                  
+0000425F                           800                                    
+0000425F                           801            
+0000425F= 59 6F 75 20 67 65 ...    802  hydrastory1_msg: dc.b   'You get on Hydra and you get zerged instantly'
+0000428C= 0D 0A                    803                  dc.b    $0D,$0A
+0000428E= 54 68 65 20 70 6C ...    804                  dc.b    'The planet is advanced but they cant talk properly '             
+000042C1= 0D 0A                    805                  dc.b    $0D,$0A
+000042C3= 41 6E 79 20 66 6F ...    806                  dc.b    'Any form of negotiation is out of the question'
+000042F1= 0D 0A                    807                  dc.b    $0D,$0A
+000042F3= 59 6F 75 20 61 72 ...    808                  dc.b    'You are forced to escape from the planet '
+0000431C= 0D 0A                    809                  dc.b    $0D,$0A
+0000431E= 4E 6F 77 20 79 6F ...    810                  dc.b    'Now you are faced with a choice between going back to Gorgon'
+0000435A= 0D 0A                    811                  dc.b    $0D,$0A
+0000435C= 4F 72 20 67 6F 20 ...    812                  dc.b    'Or go to a new planet'
+00004371= 0D 0A                    813                  dc.b    $0D,$0A
+00004373= 50 72 65 73 73 20 ...    814                  dc.b    'Press 1 to go to Gorgon'
+0000438A= 0D 0A                    815                  dc.b    $0D,$0A
+0000438C= 50 72 65 73 73 20 ...    816                  dc.b    'Press 2 to go to a random planet'
+000043AC= 0D 0A                    817                  dc.b    $0D,$0A
+000043AE= 45 6E 74 65 72 20 ...    818                  dc.b    'Enter your choice:',0
+000043C1                           819  hydrachoice1_msg:
+000043C1= 59 6F 75 20 68 61 ...    820                  dc.b    'You have chosen to go to gorgon',0
+000043E1                           821  hydrachoice2_msg:
+000043E1= 59 6F 75 20 77 61 ...    822                  dc.b    'You wander around in space after escaping'
+0000440A= 0D 0A                    823                  dc.b    $0D,$0A
+0000440C= 59 6F 75 20 65 6E ...    824                  dc.b    'You end up a planet called Imhotep',0    
+0000442F= 59 6F 75 20 67 65 ...    825  pheonixstory1_msg: dc.b 'You get on to pheonix they instantly offer you money so they can buy you'
+00004477= 0D 0A                    826                  dc.b    $0D,$0A
+00004479= 59 6F 75 20 68 61 ...    827                  dc.b    'You have a choice between fighting them or trying to flee with the money'
+000044C1= 0D 0A                    828                  dc.b    $0D,$0A
+000044C3= 50 72 65 73 73 20 ...    829                  dc.b    'Press 1 to fight'
+000044D3= 0D 0A                    830                  dc.b    $0D,$0A
+000044D5= 50 72 65 73 73 20 ...    831                  dc.b    'Press 2 to flee with the money'
+000044F3= 0D 0A                    832                  dc.b    $0D,$0A
+000044F5= 45 6E 74 65 72 20 ...    833                  dc.b    'Enter your choice:',0
+00004508                           834  pheonixchoice1_msg: 
+00004508= 59 6F 75 20 68 61 ...    835                  dc.b 'You have lost and are forced to retreat 2 crew members die'
+00004542= 0D 0A                    836                  dc.b    $0D,$0A
+00004544= 59 6F 75 20 65 6E ...    837                  dc.b 'You end up on a planet called imhotep',0
+0000456A                           838  pheonixchoice2_msg:
+0000456A= 59 6F 75 20 61 72 ...    839                  dc.b 'You are trying to escape with the $2000 dollars that you took'
+000045A7= 0D 0A                    840                  dc.b    $0D,$0A
+000045A9= 42 75 74 20 74 68 ...    841                  dc.b 'But the residents of pheonix are trying to catch you'
+000045DD= 0D 0A                    842                  dc.b    $0D,$0A
+000045DF= 41 73 20 79 6F 75 ...    843                  dc.b 'As you try to get rid of them you end up on a planet called imhotep',0
+00004623                           844  imhotepstory1_msg:
+00004623= 49 6E 20 74 68 69 ...    845                  dc.b  'In this planet the population is massive but they seem to be friendly'
+00004668= 0D 0A                    846                  dc.b    $0D,$0A
+0000466A= 49 74 20 73 65 65 ...    847                  dc.b  'It seems like you could setup a hideout in this planet'
+000046A0= 0D 0A                    848                  dc.b    $0D,$0A
+000046A2= 57 68 61 74 20 77 ...    849                  dc.b  'What will you choose to setup a hideout or try and negotiate for help'   
+000046E7= 0D 0A                    850                  dc.b    $0D,$0A      
+000046E9= 50 72 65 73 73 20 ...    851                  dc.b  'Press 1 to setup Hideout'
+00004701= 0D 0A                    852                  dc.b    $0D,$0A
+00004703= 50 72 65 73 73 20 ...    853                  dc.b  'Press 2 to negotiate'    
+00004717= 0D 0A                    854                  dc.b    $0D,$0A
+00004719= 45 6E 74 65 72 20 ...    855                  dc.b  'Enter your choice:',0
+0000472C                           856  imhotepchoice1_msg:
+0000472C= 59 6F 75 20 61 72 ...    857                  dc.b 'You are succesful in setting up ur hideout and you loose the pursuers',0
+00004772                           858  
+00004772= 59 6F 75 72 20 6E ...    859  imhotepchoice2_msg: dc.b 'Your negotiations lead to a proposition by the people'
+000047A7= 0D 0A                    860                  dc.b    $0D,$0A
+000047A9= 54 68 65 79 20 61 ...    861                  dc.b 'They are willing to help for $200'
+000047CA= 0D 0A                    862                  dc.b    $0D,$0A
+000047CC= 59 6F 75 20 64 65 ...    863                  dc.b 'You decide to pay for help'
+000047E6= 0D 0A                    864                  dc.b    $0D,$0A
+000047E8= 59 6F 75 20 67 61 ...    865                  dc.b 'You gain 3 ally ships with 15 crew members',0
+00004813                           866  lumeryastory1_msg:
+00004813= 59 6F 75 20 65 6E ...    867                  dc.b 'You end up on a planet called Lumerya the people from this planet'
+00004854= 0D 0A                    868                  dc.b    $0D,$0A     
+00004856= 41 72 65 20 76 65 ...    869                  dc.b 'Are very enteligent and know alot of languages'
+00004884= 0D 0A                    870                  dc.b    $0D,$0A
+00004886= 59 6F 75 20 61 72 ...    871                  dc.b 'You are faced with a choice between trying to ask for help in'
+000048C3= 0D 0A                    872                  dc.b    $0D,$0A
+000048C5= 54 72 61 6E 73 6C ...    873                  dc.b 'Translating and help you communicate with Hydra'
+000048F4= 0D 0A                    874                  dc.b    $0D,$0A
+000048F6= 4F 72 20 79 6F 75 ...    875                  dc.b 'Or you can choose to fight them'
+00004915= 0D 0A                    876                  dc.b    $0D,$0A
+00004917= 50 72 65 73 73 20 ...    877                  dc.b 'Press 1 to ask for help'
+0000492E= 0D 0A                    878                  dc.b    $0D,$0A
+00004930= 50 72 65 73 73 20 ...    879                  dc.b 'Press 2 to fight'
+00004940= 0D 0A                    880                  dc.b    $0D,$0A
+00004942= 45 6E 74 65 72 20 ...    881                  dc.b 'Enter your choice:',0   
+00004955                           882  lumeryachoice1_msg:
+00004955= 59 6F 75 20 61 72 ...    883                  dc.b 'You are succesful in getting help and go back to Hydra'
+0000498B= 0D 0A                    884                  dc.b    $0D,$0A
+0000498D= 42 75 74 20 79 6F ...    885                  dc.b 'But you had to pay them $1000',0
+000049AB                           886  lumeryachoice2_msg:  
+000049AB= 59 6F 75 20 61 72 ...    887                  dc.b  'You are unsucessful in trying to take over this planet'
+000049E1= 0D 0A                    888                  dc.b    $0D,$0A
+000049E3= 41 73 20 74 68 65 ...    889                  dc.b  'As their weapons are too advanced and you cant escape',0        
+00004A19                           890               
+00004A19                           891                  
+00004A19                           892                   
+00004A19                           893                  
+00004A19= 41 64 64 20 47 61 ...    894  gameplay_msg:   dc.b    'Add Gameplay !',0
+00004A28= 55 70 64 61 74 65 ...    895  update_msg:     dc.b    'Update Gameplay !',0
+00004A3A= 44 72 61 77 20 53 ...    896  draw_msg:       dc.b    'Draw Screen !',0
+00004A48= 53 74 72 69 6B 65 ...    897  hit_msg:        dc.b    'Strike!',0
+00004A50= 4D 69 73 73 21 00        898  miss_msg:       dc.b    'Miss!',0
+00004A56= 2E 00                    899  loop_msg:       dc.b    '.',0
+00004A58= 45 6E 74 65 72 20 ...    900  replay_msg:     dc.b    'Enter 0 to Quit any other number to replay : ',0
+00004A86= 53 63 6F 72 65 20 ...    901  hud_msg:        dc.b    'Score : ',0
+00004A8F= 49 6E 70 75 74 20 ...    902  incorrect_fuel_msg dc.b 'Input wrong, enter valid number for the amount fuel' , 0
+00004AC3= 49 6E 70 75 74 20 ...    903  incorrect_ship_msg dc.b 'Input wrong, enter valid number for the amount of ship',0
+00004AFA= 43 68 6F 6F 73 65 ...    904  choice_msg      dc.b    'Choose to play as Shepard or the Reapers'
+00004B22= 0D 0A                    905                  dc.b    $0D,$0A
+00004B24= 50 72 65 73 73 20 ...    906                  dc.b    'Press 1 to play as Shepard'
+00004B3E= 0D 0A                    907                  dc.b    $0D,$0A
+00004B40= 50 72 65 73 73 20 ...    908                  dc.b    'Press 2 to play as The Reapers',0
+00004B5F= 0D 0A                    909                  dc.b    $0D,$0A
+00004B61= 59 6F 75 20 68 61 ...    910  shepard_msg     dc.b    'You have chosen to play as Shepard',0
+00004B84= 59 6F 75 20 68 61 ...    911  repear_msg      dc.b    'You have chosen to play as the Reapears',0
+00004BAC                           912  
+00004BAC                           913  health:     ds.w    1
+00004BAE                           914  score:      ds.w    1 reserve space for score
+00004BB0                           915  
+00004BB0                           916      end start
+
+No errors detected
+No warnings generated
+
+
+SYMBOL TABLE INFORMATION
+Symbol-name         Value
+-------------------------
+ABANDONPLANET       32C6
+BACKTOGORGON        33DA
+CHOICE              3020
+CHOICE1MISSION1     3222
+CHOICE_MSG          4AFA
+CLEAR_SCREEN        35CC
+COLLISION           3572
+COLLISION_HIT       357E
+COLLISION_MISS      358C
+CREDIT_AMOUNT       64
+CREDIT_MSG          36F4
+CREW                3140
+CREW_AMOUNT         14
+CREW_MSG            3896
+CRLF                3610
+DECORATE            35AE
+DISTANCE_MSG        37F8
+DRAW                310C
+DRAW_MSG            4A3A
+END                 3006
+ENDING1_MSG         3E30
+ENDING2_MSG         3ECF
+ENDING3_MSG         3FC8
+ENDING4_MSG         40DD
+ENDING5_MSG         4171
+ENDL                35FA
+EXIT                0
+FIGHT               3258
+FIGHT1              3458
+FIGHTLUMERYA        3384
+FUEL                3126
+FUEL_AMOUNT         D2
+FUEL_COST           DC
+FUEL_MSG            3722
+GAME                3000
+GAMEENDING1         330E
+GAMELOOP            30C8
+GAMEPLAY            3532
+GAMEPLAY_MSG        4A19
+GETHELP             3364
+GORGON              31A4
+GORGONCHOICE1_MSG   3B34
+GORGONCHOICE2_MSG   3B82
+GORGONMISSION2      3294
+GORGONSTORY1_MSG    39F0
+GORGONSTORY2CHOICE1_MSG  3D33
+GORGONSTORY2CHOICE2_MSG  3DBC
+GORGONSTORY2_MSG    3BFC
+GORGON_MSG          3990
+HEALTH              4BAC
+HIDEOUT             34F2
+HIT_MSG             4A48
+HIT_POINT           5
+HUD                 3550
+HUD_MSG             4A86
+HYDRA               31CE
+HYDRACHOICE1_MSG    43C1
+HYDRACHOICE2_MSG    43E1
+HYDRAMISSION1       33A4
+HYDRASTORY1_MSG     425F
+HYDRA_MSG           39B0
+IMHOTEPCHOICE1_MSG  472C
+IMHOTEPCHOICE2_MSG  4772
+IMHOTEPMISSION1     34BC
+IMHOTEPSTORY1_MSG   4623
+INCORRECT_FUEL_MSG  4A8F
+INCORRECT_SHIP_MSG  4AC3
+INPUT               308A
+INPUT_MSG           36C6
+INPUT_WELCOME       3098
+LOOP                359A
+LOOP_MSG            4A56
+LUMERYACHOICE1_MSG  4955
+LUMERYACHOICE2_MSG  49AB
+LUMERYAMISSION1     332C
+LUMERYASTORY1_MSG   4813
+MAX_RATE            5
+MAX_SHIP            9
+MINE_LOC            64
+MIN_CREW            6
+MIN_FUEL            78
+MIN_RATE            1
+MIN_SHIP            1
+MISS_MSG            4A50
+MISS_POINT          8
+NEGOTIATE           3512
+NEXT                359E
+NO_OF_SHIPS         A
+OUT                 35B6
+PHEONIX             31F8
+PHEONIXCHOICE1_MSG  4508
+PHEONIXCHOICE2_MSG  456A
+PHEONIXMISSION1     3422
+PHEONIXSTORY1_MSG   442F
+PHEONIX_MSG         39CF
+PLANET              3164
+PLANET_MSG          3908
+RANDOM              3404
+RATE_MSG            3783
+REAPERS             3070
+REPEAR_MSG          4B84
+REPLAY              35D8
+REPLAY_MSG          4A58
+RUN                 3484
+SAVEPLANET          32F0
+SCORE               4BAE
+SHEPARD             3056
+SHEPARD_MSG         4B61
+SHIPS_MSG           3743
+SHIP_COST           C8
+START               2000
+TALK                3276
+UPDATE              30F2
+UPDATE_MSG          4A28
+WELCOME             300A
+WELCOME_MSG         3613
